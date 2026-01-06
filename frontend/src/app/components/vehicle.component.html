@@ -1,0 +1,86 @@
+<div class="vehicle-container">
+  <div class="header">
+    <h2>Vehicle Management</h2>
+    <button class="btn-primary" (click)="toggleForm()">
+      {{ showForm ? '✕ Cancel' : '+ Add Vehicle' }}
+    </button>
+  </div>
+
+  <div class="success-alert" *ngIf="showSuccess">
+    ✓ {{ successMessage }}
+  </div>
+
+  <div class="form-card" *ngIf="showForm">
+    <h3>Add New Vehicle</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Vehicle Type *</label>
+        <input [(ngModel)]="newVehicle.vehicleType" name="vehicleType" placeholder="e.g., SUV, Sedan" required>
+      </div>
+      <div class="form-group">
+        <label>Model *</label>
+        <input [(ngModel)]="newVehicle.model" name="model" placeholder="e.g., Toyota Innova" required>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Registration Number *</label>
+        <input [(ngModel)]="newVehicle.registrationNumber" name="reg" placeholder="AP 01 AB 1234" required>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Seating Capacity *</label>
+        <input [(ngModel)]="newVehicle.seatingCapacity" name="seatingCapacity" type="number" placeholder="Number of seats" required>
+      </div>
+      <div class="form-group">
+        <label>Status *</label>
+        <select [(ngModel)]="newVehicle.status" name="status" required>
+          <option value="AVAILABLE">Available</option>
+          <option value="BOOKED">Booked</option>
+          <option value="MAINTENANCE">Maintenance</option>
+        </select>
+      </div>
+    </div>
+    <button type="button" (click)="addVehicle()" class="btn-success">Add Vehicle</button>
+  </div>
+
+  <div class="content">
+    <h3>Vehicles List</h3>
+    <div *ngIf="vehicles.length > 0; else noVehicles" class="table-responsive">
+      <table class="vehicles-table">
+        <thead>
+          <tr>
+            <th>Registration</th>
+            <th>Vehicle Type</th>
+            <th>Model</th>
+            <th>Capacity</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let vehicle of vehicles">
+            <td><strong>{{ vehicle.registrationNumber }}</strong></td>
+            <td>{{ vehicle.vehicleType }}</td>
+            <td>{{ vehicle.model }}</td>
+            <td><span class="capacity-badge">{{ vehicle.seatingCapacity }} Seats</span></td>
+            <td>
+              <span [ngClass]="'status-' + getStatusClass(vehicle.status || 'AVAILABLE')" class="status-badge">
+                {{ vehicle.status }}
+              </span>
+            </td>
+            <td>
+              <button (click)="deleteVehicle(vehicle.id)" class="btn-danger">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <ng-template #noVehicles>
+      <div class="empty-state">
+        <p>No vehicles found. Add a new vehicle to get started.</p>
+      </div>
+    </ng-template>
+  </div>
+</div>

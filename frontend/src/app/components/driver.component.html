@@ -1,0 +1,57 @@
+<div class="driver-container">
+  <div class="header">
+    <h2>Driver Management</h2>
+    <button class="btn-primary" (click)="toggleForm()">
+      {{ showForm ? '✕ Cancel' : '+ Add Driver' }}
+    </button>
+  </div>
+
+  <div class="success-alert" *ngIf="showSuccess">
+    ✓ {{ successMessage }}
+  </div>
+
+  <div class="form-card" *ngIf="showForm">
+    <h3>Add New Driver</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input [(ngModel)]="newDriver.name" name="name" placeholder="Enter driver name" required>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Phone</label>
+        <input [(ngModel)]="newDriver.phone" name="phone" placeholder="Enter phone number">
+      </div>
+      <div class="form-group">
+        <label>License Number *</label>
+        <input [(ngModel)]="newDriver.licenseNumber" name="licenseNumber" placeholder="DL123456" required>
+      </div>
+    </div>
+    <button type="button" (click)="addDriver()" class="btn-success">Add Driver</button>
+  </div>
+
+  <div class="content">
+    <h3>Drivers List</h3>
+    <div *ngIf="drivers.length > 0; else noDrivers" class="cards-grid">
+      <div *ngFor="let driver of drivers" class="card">
+        <div class="card-header">
+          <h4>{{ driver.name }}</h4>
+          <span class="badge">DL: {{ driver.licenseNumber }}</span>
+        </div>
+        <div class="card-body">
+          <p><strong>Phone:</strong> {{ driver.phone || 'N/A' }}</p>
+          <p><strong>Rating:</strong> {{ driver.rating || 'N/A' }} ⭐</p>
+        </div>
+        <div class="card-footer">
+          <button (click)="deleteDriver(driver.id)" class="btn-danger">Delete</button>
+        </div>
+      </div>
+    </div>
+    <ng-template #noDrivers>
+      <div class="empty-state">
+        <p>No drivers found. Add a new driver to get started.</p>
+      </div>
+    </ng-template>
+  </div>
+</div>

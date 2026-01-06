@@ -1,0 +1,189 @@
+<div class="booking-container">
+  <div class="header">
+    <h2>Booking Management</h2>
+    <button class="btn-primary" (click)="toggleForm()">
+      {{ showForm ? '✕ Cancel' : '+ New Booking' }}
+    </button>
+  </div>
+
+  <div class="success-alert" *ngIf="showSuccess">
+    ✓ {{ successMessage }}
+  </div>
+
+  <div class="form-card" *ngIf="showForm">
+    <h3>Create New Booking</h3>
+    
+    <!-- Customer Section -->
+    <div class="form-section">
+      <h4>Customer Information</h4>
+      <div class="toggle-options">
+        <label class="radio-label">
+          <input type="radio" [(ngModel)]="useExistingCustomer" [value]="true" name="customerType">
+          <span>Select Existing Customer</span>
+        </label>
+        <label class="radio-label">
+          <input type="radio" [(ngModel)]="useExistingCustomer" [value]="false" name="customerType">
+          <span>Add New Customer</span>
+        </label>
+      </div>
+
+      <!-- Existing Customer Selection -->
+      <div *ngIf="useExistingCustomer" class="form-row">
+        <div class="form-group">
+          <label>Customer *</label>
+          <select [(ngModel)]="selectedCustomerId" name="customer" required>
+            <option [value]="null" disabled>Select a customer</option>
+            <option *ngFor="let customer of customers" [value]="customer.id">
+              {{ customer.name }} ({{ customer.email }})
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <!-- New Customer Form -->
+      <div *ngIf="!useExistingCustomer" class="new-customer-section">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Customer Name *</label>
+            <input [(ngModel)]="newCustomerData.name" name="cName" placeholder="Enter full name" required>
+          </div>
+          <div class="form-group">
+            <label>Email *</label>
+            <input [(ngModel)]="newCustomerData.email" name="cEmail" type="email" placeholder="customer@example.com" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Phone</label>
+            <input [(ngModel)]="newCustomerData.phone" name="cPhone" placeholder="Phone number">
+          </div>
+          <div class="form-group">
+            <label>Address</label>
+            <input [(ngModel)]="newCustomerData.address" name="cAddress" placeholder="Address">
+          </div>
+        </div>
+        <button type="button" (click)="createNewCustomer()" class="btn-create-customer">
+          {{ createdCustomerId ? '✓ Customer Created' : 'Create Customer' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Booking Details Section -->
+    <div class="form-section">
+      <h4>Booking Details</h4>
+      
+      <!-- Passenger Count Selection First -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Number of Passengers *</label>
+          <input [(ngModel)]="newBooking.passengerCount" name="passengerCount" type="number" min="1" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Driver *</label>
+          <select [(ngModel)]="selectedDriverId" name="driver" required>
+            <option [value]="null" disabled>Select a driver</option>
+            <option *ngFor="let driver of drivers" [value]="driver.id">
+              {{ driver.name }} ({{ driver.licenseNumber }})
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Vehicle * (filtered by passenger count)</label>
+          <select [(ngModel)]="selectedVehicleId" name="vehicle" required>
+            <option [value]="null" disabled>
+              {{ getAvailableVehicles().length > 0 ? 'Select a vehicle' : 'No vehicles available for ' + newBooking.passengerCount + ' passengers' }}
+            </option>
+            <option *ngFor="let vehicle of getAvailableVehicles()" [value]="vehicle.id">
+              {{ vehicle.model }} ({{ vehicle.registrationNumber }}) - {{ vehicle.seatingCapacity }} seats - ₹{{ vehicle.pricePerKm }}/km
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div *ngIf="selectedVehicleId && getSelectedVehiclePrice() > 0" class="price-info">
+        <strong>Vehicle Price: ₹{{ getSelectedVehiclePrice() }}/km</strong>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Pickup Date & Time *</label>
+          <input [(ngModel)]="newBooking.pickupDateTime" name="pickupDateTime" type="datetime-local" required>
+        </div>
+        <div class="form-group">
+          <label>Dropoff Date & Time *</label>
+          <input [(ngModel)]="newBooking.dropoffDateTime" name="dropoffDateTime" type="datetime-local" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- Location Section -->
+    <div class="form-section">
+      <h4>Trip Location</h4>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Pickup Location *</label>
+          <input [(ngModel)]="newBooking.pickupLocation" name="pickup" placeholder="Enter pickup location" required>
+        </div>
+        <div class="form-group">
+          <label>Dropoff Location *</label>
+          <input [(ngModel)]="newBooking.dropoffLocation" name="dropoff" placeholder="Enter dropoff location" required>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" (click)="addBooking()" class="btn-success" [disabled]="(!createdCustomerId && !useExistingCustomer) || !selectedDriverId || !selectedVehicleId">
+      Create Booking
+    </button>
+  </div>
+
+  <div class="content">
+    <h3>Bookings List</h3>
+    <div *ngIf="bookings.length > 0; else noBookings" class="bookings-grid">
+      <div *ngFor="let booking of bookings" class="booking-card">
+        <div class="card-header">
+          <div>
+            <h4>{{ getCustomerName(booking.customer?.id) }}</h4>
+            <p class="date">{{ booking.pickupDateTime | date:'shortDate' }}</p>
+          </div>
+          <span [ngClass]="'status-' + getStatusClass(booking.status)" class="status-badge">
+            {{ booking.status }}
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="info-row">
+            <div class="info-item">
+              <span class="label">Driver</span>
+              <span class="value">{{ getDriverName(booking.driver?.id) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Vehicle</span>
+              <span class="value">{{ getVehicleModel(booking.vehicle?.id) }}</span>
+            </div>
+          </div>
+          <div class="location-row">
+            <div class="location-item">
+              <span class="icon">📍</span>
+              <span class="location-text">{{ booking.pickupLocation }}</span>
+            </div>
+            <span class="arrow">→</span>
+            <div class="location-item">
+              <span class="icon">🎯</span>
+              <span class="location-text">{{ booking.dropoffLocation }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button (click)="deleteBooking(booking.id)" class="btn-danger">Cancel Booking</button>
+        </div>
+      </div>
+    </div>
+    <ng-template #noBookings>
+      <div class="empty-state">
+        <p>No bookings found. Create a new booking to get started.</p>
+      </div>
+    </ng-template>
+  </div>
+</div>

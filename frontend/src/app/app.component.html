@@ -1,0 +1,20 @@
+<div class="navbar">
+  <div class="navbar-container">
+    <div class="logo">
+      <h1>🚗 JaiSriRam Travels</h1>
+    </div>
+    <nav class="nav-menu">
+      <ul>
+        <li><a routerLink="/bookings" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}">Bookings</a></li>
+        <li><a routerLink="/customers" routerLinkActive="active">Customers</a></li>
+        <li><a routerLink="/drivers" routerLinkActive="active">Drivers</a></li>
+        <li><a routerLink="/vehicles" routerLinkActive="active">Vehicles</a></li>
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<main>
+  <router-outlet></router-outlet>
+</main>
+
